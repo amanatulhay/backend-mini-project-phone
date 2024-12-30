@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int           @id @default(autoincrement())
+  username        String        @unique
+  email           String        @unique
+  password        String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @default(now())
+  profile         Profile?
+  article         Article[]
+  comment         Comment[]
+
+  @@map("users")
+}
+
+model Profile {
+  id              Int           @id @default(autoincrement())
+  gender          String        @db.VarChar(255)
+  bio             String        @db.VarChar(255)
+  imageUrl        String?        @db.VarChar(255) 
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @default(now())
+  userId         Int?          @unique
+  user            User?         @relation(fields: [userId], references: [id])
+
+  @@map("profiles")
+}
+
+model Article {
+  id              Int           @id @default(autoincrement())
+  title           String        @db.VarChar(255)
+  content         String        @db.Text
+  imageUrl       String        @db.VarChar(255) 
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @default(now())
+  userId         Int?
+  user            User?         @relation(fields: [userId], references: [id])
+  phoneId        Int?
+  phone           Phone?        @relation(fields: [phoneId], references: [id])
+  comment         Comment[]
+
+  @@map("articles")
+}
+
+model Comment {
+  id              Int           @id @default(autoincrement())
+  content         String        @db.Text
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @default(now())
+  userId         Int?
+  user            User?         @relation(fields: [userId], references: [id])
+  articleId      Int?
+  article         Article?      @relation(fields: [articleId], references: [id])
+
+  @@map("comments")
+}
+
+model Phone {
+  id              Int           @id @default(autoincrement())
+  model           String        @db.VarChar(255)
+  price           Int
+  releaseDate    DateTime?
+  imageUrl       String        @db.VarChar(255)   
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @default(now())
+  brandId        Int?
+  brand           Brand?        @relation(fields: [brandId], references: [id])
+  article         Article[]
+  specification   Specification? 
+
+  @@map("phones")
+}
+
+model Specification {
+  id              Int         @id @default(autoincrement())
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @default(now())
+  processor       String      @db.VarChar(255)
+  ram             Int       
+  internalMemory Int       
+  camera          Int       
+  battery         Int
+  os              String      @db.VarChar(255)       
+  weight          Int
+  color           String      @db.VarChar(255)       
+  phoneId        Int?        @unique
+  phone           Phone?      @relation(fields: [phoneId], references: [id])
+
+  @@map("specifications")
+}
+
+model Brand {
+  id                Int         @id @default(autoincrement())
+  name              String      @db.VarChar(255)
+  countryOfOrigin   String      @db.VarChar(255)
+  imageUrl          String?      @db.VarChar(255) 
+  yearFounded       Int?         
+  popularModels     String?      @db.VarChar(255) 
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @default(now())
+  phone             Phone[] 
+
+  @@map("brands")
+}
+
